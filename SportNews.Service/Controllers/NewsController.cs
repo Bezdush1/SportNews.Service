@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using KafkaConstants;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Bson;
 using SportNews.Service.Interaction.In;
+using SportNews.Service.Kafka.Producers;
 using SportNews.Service.Models;
 using SportNews.Service.Repositories.Interfases;
-using SportNews.Service.Utils;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using Utils;
 
 namespace SportNews.Service.Controllers;
 
@@ -23,12 +25,14 @@ public class NewsController : ControllerBase
     /// <param name="newsRepository">Объект для работы с новостями.</param>
     /// <param name="logger">Объект для ведения записей.</param>
     /// <param name="cache">Объект для работы с кэшем.</param>
+    /// <param name="newsProducerService">Объект для взаимодействия с сервисом пользователей.</param>
     public NewsController(INewsRepository newsRepository, ILogger<NewsController> logger,
-        IDistributedCache cache)
+        IDistributedCache cache, NewsProducerService newsProducerService)
     {
         _newsRepository = newsRepository;
         _logger = logger;
         _cache = cache;
+        _newsProducerService = newsProducerService;
     }
 
     /// <summary>
@@ -150,6 +154,9 @@ public class NewsController : ControllerBase
             await _newsRepository.AddAsync(newNews);
 
             await _cache.SetStringAsync($"news_{newNews.Id}", JsonSerializer.Serialize(newNews));
+
+            // Отправляем сообщение в микросервис пользователей
+            await _newsProducerService.SendRegistrationRequestAsync(newNews.Id, "67372df1077cd2c1072a883b");
 
             _logger.LogInformation("Новость успешно добавлена");
             return Ok();
@@ -287,10 +294,53 @@ public class NewsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Обновление метки подтверждения новости.
+    /// </summary>
+    /// <param name="request">Структура, подтверждающая создание новости.</param>
+    /// <response code="200">Успешное обновление новости, с указанным идентификатором.</response>
+    /// <response code="404">В БД отсутствует новость, с указанным идентификатором.</response>
+    /// <response code="422">Во время выполнения метода возникло исключение.</response>
+    [HttpPost("update-timestamp")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> UpdateTimestamp([FromBody] ConfirmationMessage request)
+    {
+        try
+        {
+            _logger.LogInformation($"Получен запрос на обновление времени для новости: {request.ObjectId}");
+
+            var news = await _newsRepository.GetByIdAsync(request.ObjectId);
+
+            if (news == null)
+            {
+                string msg = $"Новость с идентификатором {request.ObjectId} отсутствует";
+                _logger.LogTrace(msg);
+                return this.NotFoundDetails(msg);
+            }
+
+            news.PublishedAt = DateTime.Parse(request.ConfirmationTimestamp);
+
+            await _newsRepository.UpdateAsync(news.Id, news);
+
+            _logger.LogInformation($"Новость {request.ObjectId} успешно обновлена с новым временем: {request.ConfirmationTimestamp}");
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            string msg = $"Во время обновления времени новости {request.ObjectId}, произошла ошибка";
+            _logger.LogError(ex, msg);
+            return this.UnprocessableEntityDetails(msg);
+        }
+    }
+
 
     private readonly INewsRepository _newsRepository;
 
     private readonly ILogger<NewsController> _logger;
 
     private readonly IDistributedCache _cache;
+
+    private readonly NewsProducerService _newsProducerService;
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Web.Mvc;
 
-namespace SportNews.Service.Utils;
+namespace ControllerExtentions;
 
 /// <summary>
 /// Вспомогательный класс, для предоставления статуса ошибки

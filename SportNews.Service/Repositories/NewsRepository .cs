@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using SportNews.Service.Models;
 using SportNews.Service.Repositories.Interfases;

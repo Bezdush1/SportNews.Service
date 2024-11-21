@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using SportNews.Service.Controllers;
 using SportNews.Service.DatabaseTests.Data;
+using SportNews.Service.Kafka.Producers;
 using SportNews.Service.Repositories;
 using SportNews.Service.Settings;
 
@@ -48,7 +50,10 @@ public class DatabaseTestsFactory
     /// <returns>Контроллер для работы с новостями.</returns>
     public NewsController Build()
     {
-        return new NewsController(NewsRepository, Logger.Object, _cache);
+        var producerMock = new Mock<IProducer<Null, string>>();
+        var producerService = new NewsProducerService(producerMock.Object);
+
+        return new NewsController(NewsRepository, Logger.Object, _cache, producerService);
     }
 
     /// <summary>
@@ -58,7 +63,10 @@ public class DatabaseTestsFactory
     /// <returns>Контроллер для работы с новостями.</returns>
     public NewsController Build(IDistributedCache cache)
     {
-        return new NewsController(NewsRepository, Logger.Object, cache);
+        var producerMock = new Mock<IProducer<Null, string>>();
+        var producerService = new NewsProducerService(producerMock.Object);
+
+        return new NewsController(NewsRepository, Logger.Object, cache, producerService);
     }
 
     private readonly IOptions<DatabaseSettings> _options;

@@ -1,5 +1,4 @@
-﻿using MongoDB.Bson;
-using SportNews.Service.Models;
+﻿using SportNews.Service.Models;
 
 namespace SportNews.Service.Repositories.Interfases;
 

@@ -1,17 +1,17 @@
-using SportNews.Service.Repositories.Interfases;
-using SportNews.Service.Repositories;
-using SportNews.Service.Settings;
+using Confluent.Kafka;
+using System.Reflection;
+using Users.Service.Kafka.Consumers;
+using Users.Service.Kafka.Produsers;
+using Users.Service.Repositories;
+using Users.Service.Repositories.Interfases;
+using Users.Service.Settings;
 using NLog.Web;
 using NLog;
-using System.Reflection;
-using Confluent.Kafka;
-using SportNews.Service.Kafka.Consumers;
-using SportNews.Service.Kafka.Producers;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 try
 {
-    logger.Info("Запуск сервиса спортивных новостей");
+    logger.Info("Запуск сервиса пользователей");
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -20,41 +20,26 @@ try
     builder.Services.Configure<DatabaseSettings>(
         builder.Configuration.GetSection("MongoDBSettings"));
 
-    // Чтение настроек подключения к Redis
-    builder.Services.Configure<RedisSettings>(
-        builder.Configuration.GetSection("Redis"));
+    // Добавляем функционал для работы с пользователями.
+    builder.Services.AddSingleton<IUserRepository, UserRepository>();
 
-    // Добавление Redis как реализацию IDistributedCache
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = "localhost:6379";
-        options.InstanceName = "RedisCacheInstance"; // Опционально, имя инстанса
-    });
-
-
-    // Добавляем функционал для работы с новостями
-    builder.Services.AddSingleton<INewsRepository, NewsRepository>();
-
-    // Конфигурация Kafka для сервиса новостей
     var config = new ConsumerConfig
     {
-        GroupId = "news-service-group",
+        GroupId = "user-service-group",
         BootstrapServers = "localhost:9092",
         AutoOffsetReset = AutoOffsetReset.Earliest
     };
 
     var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
-    // Регистрация консюмера и продюсера для сервиса новостей
     builder.Services.AddSingleton<IConsumer<Ignore, string>>(sp => new ConsumerBuilder<Ignore, string>(config).Build());
     builder.Services.AddSingleton<IProducer<Null, string>>(sp => new ProducerBuilder<Null, string>(producerConfig).Build());
 
-    // Регистрация хостинга и продюсера для ObjectService
-    builder.Services.AddHostedService<NewsConsumerService>();
-    builder.Services.AddSingleton<NewsProducerService>();
+    builder.Services.AddHostedService<UserConsumerService>();
+    builder.Services.AddSingleton<UserProducerService>();
 
     builder.Services.AddControllers();
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -62,6 +47,10 @@ try
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath); // Подключаем XML-документацию
     });
+
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
     var app = builder.Build();
 
@@ -75,13 +64,18 @@ try
         });
     }
 
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
     app.UseHttpsRedirection();
 
     app.UseAuthorization();
 
     app.MapControllers();
-
-    app.UseStaticFiles();
 
     app.Run();
 }

@@ -5,8 +5,6 @@
 /// </summary>
 public class NewsInfo
 {
-    private string _id { get; set; } = string.Empty;
-
     /// <summary>
     /// Заголовок.
     /// </summary>
