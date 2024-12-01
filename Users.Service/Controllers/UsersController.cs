@@ -51,9 +51,6 @@ public class UserController : ControllerBase
             user.Id = ObjectId.GenerateNewId().ToString();
             await _repository.AddUserAsync(user);
 
-            // Отправка подтверждения в Kafka
-            await _producerService.SendConfirmation(user.Id, DateTime.Now.ToString());
-
             _logger.LogInformation("Пользователь успешно создан");
             return Ok();
         }
@@ -170,7 +167,7 @@ public class UserController : ControllerBase
             await _repository.UpdateUserAsync(user.Id, user);
 
             // Отправка в сервис новостей
-            await _producerService.SendConfirmation(request.NewsId, DateTime.UtcNow.ToString());
+            await _producerService.SendConfirmation(request.ObjectId, DateTime.UtcNow.ToString());
 
             _logger.LogInformation("Новость успешно подтверждена");
             return Ok();

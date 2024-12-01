@@ -39,17 +39,21 @@ try
     var config = new ConsumerConfig
     {
         GroupId = "news-service-group",
-        BootstrapServers = "localhost:9092",
+        BootstrapServers = "localhost:9092", 
         AutoOffsetReset = AutoOffsetReset.Earliest
     };
 
     var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
+    var producer = new ProducerBuilder<Null, string>(config).Build();
+
+
+
     // Регистрация консюмера и продюсера для сервиса новостей
     builder.Services.AddSingleton<IConsumer<Ignore, string>>(sp => new ConsumerBuilder<Ignore, string>(config).Build());
     builder.Services.AddSingleton<IProducer<Null, string>>(sp => new ProducerBuilder<Null, string>(producerConfig).Build());
 
-    // Регистрация хостинга и продюсера для ObjectService
+    // Регистрация продюсера и консьюмера
     builder.Services.AddHostedService<NewsConsumerService>();
     builder.Services.AddSingleton<NewsProducerService>();
 

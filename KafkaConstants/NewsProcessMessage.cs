@@ -13,5 +13,5 @@ public class NewsProcessMessage
     /// <summary>
     /// Идентификатор новости.
     /// </summary>
-    public string NewsId { get; set; } = string.Empty;
+    public string ObjectId { get; set; } = string.Empty;
 }

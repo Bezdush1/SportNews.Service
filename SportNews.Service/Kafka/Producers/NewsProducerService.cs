@@ -11,14 +11,17 @@ namespace SportNews.Service.Kafka.Producers;
 public class NewsProducerService
 {
     private readonly IProducer<Null, string> _producer;
+    private readonly ILogger<NewsProducerService> _logger;
 
     /// <summary>
     /// Конструктор класса.
     /// </summary>
     /// <param name="producer">Объект kafka-продюсер.</param>
-    public NewsProducerService(IProducer<Null, string> producer)
+    /// <param name="logger">Объект для ведения записей.</param>
+    public NewsProducerService(IProducer<Null, string> producer, ILogger<NewsProducerService> logger)
     {
         _producer = producer;
+        _logger = logger;
     }
 
     /// <summary>
@@ -32,7 +35,14 @@ public class NewsProducerService
         var message = new { ObjectId = objectId, UserId = userId };
         var serializedMessage = JsonSerializer.Serialize(message);
 
-        await _producer.ProduceAsync(KafkaTopicsConstants.ObjectServiceTopic,
-            new Message<Null, string> { Value = serializedMessage });
+        try
+        {
+            var result = await _producer.ProduceAsync(KafkaTopicsConstants.ObjectServiceTopic,
+                new Message<Null, string> { Value = serializedMessage });
+        }
+        catch (ProduceException<Null, string> ex)
+        {
+            _logger.LogError(ex.Error.Reason);
+        }
     }
 }

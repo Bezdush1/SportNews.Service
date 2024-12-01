@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SportNews.Service.DatabaseT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Users.Service", "Users.Service\Users.Service.csproj", "{54440F3F-2A7C-44B4-9743-A760D627EE5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaConstants", "KafkaConstants\KafkaConstants.csproj", "{00D22759-4853-448B-8D9E-1B07E2149E75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KafkaConstants", "KafkaConstants\KafkaConstants.csproj", "{00D22759-4853-448B-8D9E-1B07E2149E75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj", "{E1D420F7-561E-419F-AAA3-ECE1D25DC825}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils", "Utils\Utils.csproj", "{E1D420F7-561E-419F-AAA3-ECE1D25DC825}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

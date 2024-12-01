@@ -79,10 +79,10 @@ public class UserConsumerService : IHostedService
                 user.RegisteredObjects++;
                 await _userRepository.UpdateUserAsync(message.UserId, user);
 
-                await _producerService.SendConfirmation(message.NewsId, DateTime.UtcNow.ToString());
+                await _producerService.SendConfirmation(message.ObjectId, DateTime.UtcNow.ToString());
 
                 _logger.LogInformation($"Пользователь с идентификатором {message.UserId}, подтвердил новость " +
-                    $"с идентификатором {message.NewsId}");
+                    $"с идентификатором {message.ObjectId}");
             }
             catch (Exception ex)
             {

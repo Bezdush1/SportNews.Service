@@ -23,5 +23,5 @@ public class NewsInfo
     /// <summary>
     /// Дата публикации.
     /// </summary>
-    public DateTime PublishedAt { get; set; }
+    public DateTime? PublishedAt { get; set; }
 }

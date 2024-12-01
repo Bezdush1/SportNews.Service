@@ -148,7 +148,7 @@ public class NewsController : ControllerBase
                 Title = news.Title,
                 Content = news.Content,
                 Category = news.Category,
-                PublishedAt = news.PublishedAt
+                PublishedAt = news.PublishedAt,
             };
 
             await _newsRepository.AddAsync(newNews);

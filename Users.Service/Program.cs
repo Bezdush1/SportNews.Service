@@ -23,14 +23,16 @@ try
     // Добавляем функционал для работы с пользователями.
     builder.Services.AddSingleton<IUserRepository, UserRepository>();
 
+    // Конфигурация Kafka для сервиса пользователей
     var config = new ConsumerConfig
     {
         GroupId = "user-service-group",
-        BootstrapServers = "localhost:9092",
+        BootstrapServers = "localhost:9092", 
         AutoOffsetReset = AutoOffsetReset.Earliest
     };
 
-    var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" };
+    var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" }; 
+
 
     builder.Services.AddSingleton<IConsumer<Ignore, string>>(sp => new ConsumerBuilder<Ignore, string>(config).Build());
     builder.Services.AddSingleton<IProducer<Null, string>>(sp => new ProducerBuilder<Null, string>(producerConfig).Build());
