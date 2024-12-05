@@ -18,45 +18,66 @@ namespace SportNews.Service.DatabaseTests.Factory;
 /// </summary>
 public class DatabaseTestsFactory
 {
+    private readonly IServiceProvider _serviceProvider;
+
     /// <summary>
     /// Конструктор класса.
     /// </summary>
     public DatabaseTestsFactory()
     {
+        // Настраиваем параметры для репозитория
         _options = OptionsDataFactory.GetDatabaseOptions();
-
         NewsRepository = new(_options);
 
-        // Настраиваем сервисы и создаем IDistributedCache с использованием памяти
+        // Создаём коллекцию сервисов
         var services = new ServiceCollection();
+
+        // Настраиваем Redis в памяти
         services.AddDistributedMemoryCache();
 
-        var serviceProvider = services.BuildServiceProvider();
-        _cache = serviceProvider.GetRequiredService<IDistributedCache>();
-
-        // Конфигурация Kafka для сервиса новостей
-        var config = new ConsumerConfig
+        // Настраиваем Kafka
+        var consumerConfig = new ConsumerConfig
         {
             GroupId = "news-service-group",
             BootstrapServers = "localhost:9092",
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
 
-        var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" };
+        var producerConfig = new ProducerConfig
+        {
+            BootstrapServers = "localhost:9092"
+        };
 
-        // Регистрация консюмера и продюсера для сервиса новостей
-        services.AddSingleton<IConsumer<Ignore, string>>(sp => new ConsumerBuilder<Ignore, string>(config).Build());
-        services.AddSingleton<IProducer<Null, string>>(sp => new ProducerBuilder<Null, string>(producerConfig).Build());
+        services.AddSingleton<IConsumer<Ignore, string>>(sp =>
+            new ConsumerBuilder<Ignore, string>(consumerConfig).Build());
+        services.AddSingleton<IProducer<Null, string>>(sp =>
+            new ProducerBuilder<Null, string>(producerConfig).Build());
 
-        // Регистрация продюсера и консьюмера
-        services.AddHostedService<NewsConsumerService>();
+        // Настройка логирования
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.AddDebug();
+        });
+
+        // Регистрация Kafka-продюсера и консюмера
         services.AddSingleton<NewsProducerService>();
+        services.AddHostedService<NewsConsumerService>();
 
-        NewsProducerService = serviceProvider.GetRequiredService<NewsProducerService>();
+        // Регистрируем репозиторий и другие зависимости
+        services.AddSingleton<NewsRepository>();
+        services.AddSingleton(_options);
+
+        // Сохраняем провайдер сервисов
+        _serviceProvider = services.BuildServiceProvider();
+
+        // Получаем экземпляр Kafka-продюсера
+        NewsProducerService = _serviceProvider.GetRequiredService<NewsProducerService>();
+        _cache = _serviceProvider.GetRequiredService<IDistributedCache>();
     }
 
     /// <summary>
-    /// Объект, для ведения записей.
+    /// Объект для ведения записей.
     /// </summary>
     public Mock<ILogger<NewsController>> Logger { get; set; } = new Mock<ILogger<NewsController>>();
 
@@ -66,7 +87,7 @@ public class DatabaseTestsFactory
     public NewsRepository NewsRepository { get; set; }
 
     /// <summary>
-    /// Класс, представляющий kafka-продюсера,
+    /// Класс, представляющий Kafka-продюсера,
     /// для отправления запроса на подтверждения новости.
     /// </summary>
     public NewsProducerService NewsProducerService { get; set; }

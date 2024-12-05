@@ -7,6 +7,7 @@ using Users.Service.Repositories.Interfases;
 using Users.Service.Settings;
 using NLog.Web;
 using NLog;
+using System.Net;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 try
@@ -62,15 +63,8 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsNewsService API V1");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "UsersService API V1");
         });
-    }
-
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
     }
 
     app.UseHttpsRedirection();

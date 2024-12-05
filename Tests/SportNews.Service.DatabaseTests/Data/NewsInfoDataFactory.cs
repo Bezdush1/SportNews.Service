@@ -19,7 +19,7 @@ public static class NewsInfoDataFactory
             Title = $"Title {i}",
             Content = $"Content {i}",
             Category = $"Category {i}",
-            PublishedAt = DateTime.UtcNow
+            PublishedAt = null
         };
     }
 }

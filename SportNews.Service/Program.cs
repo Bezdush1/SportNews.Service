@@ -7,6 +7,7 @@ using System.Reflection;
 using Confluent.Kafka;
 using SportNews.Service.Kafka.Consumers;
 using SportNews.Service.Kafka.Producers;
+using System.Net;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 try
@@ -75,7 +76,7 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsNewsService API V1");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SportNewsService API V1");
         });
     }
 

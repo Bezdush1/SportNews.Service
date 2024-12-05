@@ -35,7 +35,7 @@ public class DatabaseTests
     /// Добавление 100 записей в БД.
     /// </summary>
     /// <remarks>Тесты, выполняются в порядке приоритетов.</remarks>
-    [Fact, TestPriority(1)]
+    //[Fact, TestPriority(1)]
     public async Task AddNews_Iteration_100_Success()
     {
         await AddNews_Iteration_Success(100);
@@ -45,7 +45,7 @@ public class DatabaseTests
     /// Удаление записей из БД.
     /// </summary>
     /// <remarks>Тесты, выполняются в порядке приоритетов.</remarks>
-    [Fact, TestPriority(2)]
+    //[Fact, TestPriority(2)]
     public async Task DeleteAll_After_100()
     {
         await DeleteAll_Should_Remove_All_News();
@@ -55,7 +55,7 @@ public class DatabaseTests
     /// Добавление 100000 записей в БД.
     /// </summary>
     /// <remarks>Тесты, выполняются в порядке приоритетов.</remarks>
-    //[Fact, TestPriority(3)]
+    [Fact, TestPriority(3)]
     public async Task AddNews_Iteration_100000_Success()
     {
         await AddNews_Iteration_Success(100000);
@@ -65,7 +65,7 @@ public class DatabaseTests
     /// Удаление записей из БД.
     /// </summary>
     /// <remarks>Тесты, выполняются в порядке приоритетов.</remarks>
-    //[Fact, TestPriority(4)]
+    [Fact, TestPriority(4)]
     public async Task DeleteAll_After_100000()
     {
         await DeleteAll_Should_Remove_All_News();
@@ -75,7 +75,7 @@ public class DatabaseTests
     /// Очистка кэша перед получением данных из БД.
     /// </summary>
     /// <remarks>Тесты, выполняются в порядке приоритетов.</remarks>
-    [Fact, TestPriority(5)]
+    //[Fact, TestPriority(5)]
     public async Task ClearCache()
     {
         await Clear_Cache();

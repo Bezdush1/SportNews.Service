@@ -1,0 +1,28 @@
+﻿{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/swagger1",
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7080
+        }
+      ],
+      "DownstreamScheme": "https" // Если сервисы используют HTTPS
+    },
+    {
+      "UpstreamPathTemplate": "/swagger2",
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7255
+        }
+      ],
+      "DownstreamScheme": "https" // Если сервисы используют HTTPS
+    }
+  ]
+}
